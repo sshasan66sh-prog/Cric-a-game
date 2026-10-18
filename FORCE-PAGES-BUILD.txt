@@ -1,0 +1,5 @@
+Trigger GitHub Pages rebuild
+
+This file was added by GitHub Copilot to force a rebuild of GitHub Pages after an earlier edit to index.html.
+
+Timestamp: 2026-10-18T00:00:00Z
