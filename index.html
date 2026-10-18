@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#07120e">
 <title>Cricket Auction</title>
@@ -150,7 +153,7 @@ input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--turf);ou
 .recent b{color:var(--ink)}
 /* tabs */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;justify-content:center;gap:6px;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--line)}
-.tabs button{flex:1;max-width:170px;min-height:50px;border-radius:12px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.tabs button{flex:1;max-width:170px;min-height:50px;border-radius:12px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 .tabs button span{font-size:18px}
 .tabs button.on{background:var(--card2);color:var(--ink);box-shadow:inset 0 -3px 0 var(--brass)}
 /* squad / xi */
@@ -207,7 +210,7 @@ input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--turf);ou
 .xilist li{display:flex;justify-content:space-between;padding:3px 0}
 .xilist .y{color:var(--ok);font-weight:700}
 .xilist .n{color:var(--muted)}
-#toast{position:fixed;left:50%;transform:translate(-50%,-20px);top:calc(12px + env(safe-area-inset-top,0px));z-index:50;max-width:92vw;padding:10px 16px;border-radius:12px;background:var(--ink);color:var(--bg);font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:.2s}
+#toast{position:fixed;left:50%;transform:translate(-50%,-20px);top:calc(12px + env(safe-area-inset-top,0px));z-index:50;max-width:92vw;padding:10px 16px;border-radius:12px;background:var(--ink);color:var(--card);box-shadow:0 14px 26px rgba(0,0,0,.2);opacity:0;transition:opacity .2s ease,transform .2s ease}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){.lot.extra{animation:none}.stamp{animation:none}#bar{transition:none}}
 </style>
@@ -222,7 +225,7 @@ opts = opts || {};
 const LS = opts.lsKey || 'cricket-auction:last';
 const GRACE = 600, RESULT_MS = 3200;
 const COLORS = ['#e2483d','#e3b341','#3fb67a','#4aa3e8','#b07be8','#ef8a3c','#2fc4c4','#e86fa6'];
-const SAMPLE = 'Virat Kohli 6\nBabar Azam 6\nJasprit Bumrah 5\nMitchell Starc 7\nShaheen Afridi 4\nRohit Sharma 6\nRashid Khan 5\nPat Cummins 5\nBen Stokes 4\nJos Buttler 5\nHardik Pandya 4\nMS Dhoni 4\nRishabh Pant 3\nFakhar Zaman 2\nMohammad Rizwan 4\nShadab Khan 2\nKane Williamson 3\nGlenn Maxwell 3\nSuryakumar Yadav 4\nRavindra Jadeja 3\nKL Rahul 3\nShubman Gill 3\nHaris Rauf 2\nNaseem Shah 2';
+const SAMPLE = 'Virat Kohli 6\nBabar Azam 6\nJasprit Bumrah 5\nMitchell Starc 7\nShaheen Afridi 4\nRohit Sharma 6\nRashid Khan 5\nPat Cummins 5\nBen Stokes 4\nJos Buttler 5\nHardik Pandya 4\nMS Dhoni 6\nTravis Head 5\nKagiso Rabada 4\nSuryakumar Yadav 6\nRavindra Jadeja 5\nDavid Warner 6\nSam Curran 5\nAndre Russell 7\nKuldeep Yadav 4\nFaf du Plessis 6\nJonny Bairstow 5\nAxar Patel 4\nMohammed Shami 4';
 
 const S = {
   db:null, user:null, uid:null, canWrite:null, connecting:true,
@@ -236,7 +239,7 @@ root.innerHTML = '<div id="view"></div><div id="toast" aria-live="polite"></div>
 const V = root.querySelector('#view'), T = root.querySelector('#toast');
 
 /* ---------- tiny helpers ---------- */
-const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const clone = o => JSON.parse(JSON.stringify(o));
 const ls = {
   get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
@@ -558,15 +561,15 @@ function vHome(){
   let warn = '';
   if (S.connecting) warn = '<div class="note">Connecting to the live game service.</div>';
   else if (!S.db) warn = '<div class="note warn">Live play needs the shared artifact link opened inside Claude. This view has no game service.</div>';
-  else if (S.canWrite === false) warn = '<div class="note warn">You have view-only access, so you can watch with a room code but not play. Ask the artifact owner to share it with you as an editor or contributor.</div>';
+  else if (S.canWrite === false) warn = '<div class="note warn">You have view-only access, so you can watch with a room code but not play. Ask the artifact owner to share it with you as an editor or collaborator.</div>';
   return '<div class="wrap home">' +
     '<div class="brand"><div class="stump"><i></i><i></i><i></i></div><h1>Cricket<br>Auction</h1><p>Build a squad against your friends. Bid live, each on your own phone.</p></div>' + warn +
     (resume && S.db ? '<section class="card"><h2>Room ' + esc(resume) + '</h2><p class="muted">You were here recently.</p><div style="height:10px"></div><button class="btn pri" data-act="resume">Go back in</button></section>' : '') +
     '<section class="card"><h2>Join a game</h2>' +
-      '<label for="f-code">Room code</label><input id="f-code" type="text" name="code" maxlength="6" autocapitalize="characters" autocomplete="off" value="' + esc(S.form.code || '') + '" placeholder="e.g. KX7P2">' +
-      '<label for="f-team">Your team name</label><input id="f-team" type="text" name="team" maxlength="20" autocomplete="off" value="' + esc(S.form.team || '') + '" placeholder="e.g. Karachi Kings">' +
+      '<label for="f-code">Room code</label><input id="f-code" type="text" name="code" maxlength="6" autocapitalize="characters" autocomplete="off" value="' + esc(S.form.code || '') + '" placeholder="ABCDE" />' +
+      '<label for="f-team">Your team name</label><input id="f-team" type="text" name="team" maxlength="20" autocomplete="off" value="' + esc(S.form.team || '') + '" placeholder="e.g. Karachi Kings" />' +
       '<div style="height:12px"></div><button class="btn pri" data-act="join"' + (S.db ? '' : ' disabled') + '>Join auction</button></section>' +
-    '<section class="card"><h2>Host a game</h2><p class="muted">You pick the players and rules, then run the auction.</p><div style="height:12px"></div><button class="btn" data-act="create"' + (S.db ? '' : ' disabled') + '>Create a room</button></section>' +
+    '<section class="card"><h2>Host a game</h2><p class="muted">You pick the players and rules, then run the auction.</p><div style="height:12px"></div><button class="btn" data-act="create"' + (S.db ? '' : ' disabled') + '>Create room</button></section>' +
     (opts.onReset ? '<p class="center"><button class="btn sm ghost" data-act="resetfb">Change Firebase project</button></p>' : '') +
     '</div>';
 }
@@ -587,21 +590,21 @@ function hJudge(){
   if (c.judgeMode === 'none') return '<small>No judge: the auction ends with the final squads and no winner.</small>';
   if (c.judgeMode === 'host') return '<small>You will judge the Playing XIs.</small>';
   return '<small>Pick the judge. They can still play as a team.</small><div class="chips" style="margin-top:8px">' +
-    (S.members.map(m => '<button class="chip" data-act="jpick" data-u="' + esc(m.uid) + '" style="' + (c.judgeId === m.uid ? 'border-color:var(--brass);box-shadow:0 0 0 1px var(--brass)' : '') + '">' + dotHtml(m.uid) + esc(m.team) + '</button>').join('') || '<small>Teams will appear here once they join.</small>') + '</div>';
+    (S.members.map(m => '<button class="chip" data-act="jpick" data-u="' + esc(m.uid) + '" style="' + (c.judgeId === m.uid ? 'border-color:var(--brass);box-shadow:0 0 0 1px var(--brass)' : '') + '">' + dotHtml(m.uid) + esc(m.team) + '</button>').join('') || '<small>No valid judge option yet.</small>') + '</div>';
 }
 function hStart(){
   const iss = startIssues();
-  return '<h2>Ready?</h2>' + (iss.length ? '<ul class="issues">' + iss.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>' : '<p class="muted" style="margin-bottom:10px">Players are shuffled when you start, so nobody knows the order, you included.</p>') +
+  return '<h2>Ready?</h2>' + (iss.length ? '<ul class="issues">' + iss.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>' : '<p class="muted" style="margin-bottom:10px">Players are shuffled when you start, so the order is different every game.</p>') +
     '<button class="btn pri big" data-act="start"' + (iss.length ? ' disabled' : '') + '>Start auction</button>';
 }
 function vLobbyHost(){
   const r = S.room, c = r.cfg;
   const hp = !me() ? '<section class="card"><h2>Play too?</h2><p class="muted">Hosting doesn\'t stop you bidding. Give yourself a team name.</p>' +
-    '<div class="inline" style="margin-top:8px"><div style="flex:1"><input type="text" name="hostteam" maxlength="20" aria-label="Your team name" value="' + esc(S.form.hostteam || '') + '" placeholder="Your team name"></div><button class="btn sm" data-act="hostplay">Join</button></div></section>' : '';
-  const plist = r.players.map(p => '<div class="prow"><span>' + esc(p.name) + '</span><em>' + p.base + 'cr</em><button data-act="delp" data-id="' + esc(p.id) + '" aria-label="Remove ' + esc(p.name) + '">x</button></div>').join('');
+    '<div class="inline" style="margin-top:8px"><div style="flex:1"><input type="text" name="hostteam" maxlength="20" aria-label="Your team name" value="' + esc(S.form.hostteam || '') + '" placeholder="Your team" /></div><button class="btn sm" data-act="hostjoin">Join</button></div></section>' : '';
+  const plist = r.players.map(p => '<div class="prow"><span>' + esc(p.name) + '</span><em>' + p.base + 'cr</em><button data-act="delp" data-id="' + esc(p.id) + '" aria-label="Remove ' + esc(p.name) + '">×</button></div>').join('');
   return '<div class="wrap">' +
     '<div class="top"><div><b>Room setup</b><small>You are the host</small></div><button class="btn sm ghost" data-act="leave">Leave</button></div>' +
-    '<section class="card"><small>Send the invite link, or tell friends to open the game, tap Join and type this code.</small><div class="code" data-act="copy">' + esc(r.code) + '</div>' + (opts.inviteUrl ? '<button class="btn gold" data-act="invite">Send invite link</button>' : '') + '</section>' +
+    '<section class="card"><small>Send the invite link, or tell friends to open the game, tap Join and type this code.</small><div class="code" data-act="copy">' + esc(r.code) + '</div>' + (opts.inviteUrl ? '<div style="height:8px"></div><button class="btn" data-act="invite">Share invite</button>' : '') + '</section>' +
     '<section class="card" id="lb-teams">' + hTeams() + '</section>' + hp +
     '<section class="card"><h2>Rules</h2>' +
       stepRow('Teams', 'maxTeams', c.maxTeams, 1, 8, '', 'Most teams that can join') +
@@ -616,10 +619,10 @@ function vLobbyHost(){
     '</section>' +
     '<section class="card"><h2>Players <small>' + r.players.length + ' in the pool</small></h2>' +
       (plist ? '<div class="plist">' + plist + '</div>' : '<p class="muted">No players yet. Add some below, or load a sample list to try the game.</p>') +
-      '<div class="inline" style="margin-top:12px"><div style="flex:1"><label for="np-name">Player name</label><input id="np-name" type="text" name="pname" maxlength="28" autocomplete="off" value="' + esc(S.form.pname || '') + '"></div>' +
-      '<div style="width:92px"><label for="np-base">Base cr</label><input id="np-base" type="number" inputmode="numeric" min="1" max="100" name="pbase" value="' + esc(S.form.pbase || '') + '" placeholder="1"></div></div>' +
+      '<div class="inline" style="margin-top:12px"><div style="flex:1"><label for="np-name">Player name</label><input id="np-name" type="text" name="pname" maxlength="28" autocomplete="off" value="' + esc(S.form.pname || '') + '" placeholder="e.g. Jasprit Bumrah" /></div>' +
+      '<div style="width:92px"><label for="np-base">Base cr</label><input id="np-base" type="number" inputmode="numeric" min="1" max="100" name="pbase" value="' + esc(S.form.pbase || '') + '" placeholder="5" /></div></div>' +
       '<div class="actions"><button class="btn pri" data-act="addp">Add player</button><button class="btn" data-act="togglebulk">' + (S.form.bulkOpen ? 'Hide list box' : 'Paste a list') + '</button></div>' +
-      (S.form.bulkOpen ? '<label for="np-bulk">One per line, like "Kohli 5cr"</label><textarea id="np-bulk" name="bulk" placeholder="Kohli 5cr&#10;Babar Azam 6cr&#10;Bumrah 3cr">' + esc(S.form.bulk || '') + '</textarea><div class="actions"><button class="btn pri" data-act="bulk">Add all lines</button></div>' : '') +
+      (S.form.bulkOpen ? '<label for="np-bulk">One per line, like "Kohli 5cr"</label><textarea id="np-bulk" name="bulk" placeholder="Kohli 5cr&#10;Babar Azam 6cr&#10;Bumrah 3cr">' + esc(S.form.bulk || '') + '</textarea><div class="actions"><button class="btn" data-act="parsebulk">Add list</button></div>' : '') +
       '<div class="actions"><button class="btn ghost" data-act="sample">Load 24 sample players</button>' + (r.players.length ? '<button class="btn ghost danger" data-act="clearp">Clear all</button>' : '') + '</div>' +
     '</section>' +
     '<section class="card" id="lb-start">' + hStart() + '</section></div>';
@@ -741,10 +744,8 @@ function vXiPhase(){
 function vSquad(){
   ensureXI();
   const squad = teamSold(S.uid), size = xiSize(), pm = pMap(), locked = S.myLocked, inXI = new Set(S.myXI.filter(Boolean));
-  const left = squad.map((x, i) => '<button class="srow' + (S.sel && S.sel.k === 'p' && S.sel.id === x.pid ? ' sel' : '') + (inXI.has(x.pid) ? ' used' : '') + '" data-act="sq" data-pid="' + esc(x.pid) + '"' + (locked ? ' disabled' : '') + '><i>' + (i + 1) + '</i><span>' + esc(pm[x.pid].name) + '</span><em>' + x.price + 'cr</em></button>').join('') ||
-    '<p class="muted">No players yet. Win a bid and they show up here, in the order you bought them.</p>';
-  const right = S.myXI.map((pid, i) => '<div class="slot' + (S.sel && S.sel.k === 's' && S.sel.i === i ? ' sel' : '') + '"><button class="sl' + (pid ? '' : ' empty') + '" data-act="slot" data-i="' + i + '"' + (locked ? ' disabled' : '') + '><i>' + (i + 1) + '</i><span>' + (pid ? esc(pm[pid].name) : 'Empty') + '</span></button>' +
-    (pid && !locked ? '<button class="x" data-act="unslot" data-i="' + i + '" aria-label="Remove from XI">x</button>' : '') + '</div>').join('');
+  const left = squad.map((x, i) => '<button class="srow' + (S.sel && S.sel.k === 'p' && S.sel.id === x.pid ? ' sel' : '') + (inXI.has(x.pid) ? ' used' : '') + '" data-act="sq" data-pid="' + esc(x.pid) + '"><i>' + (i + 1) + '</i><span>' + esc((pm[x.pid] || {}).name) + '</span><em>' + x.price + 'cr</em></button>').join('') || '<p class="muted">No players yet. Win a bid and they show up here, in the order you bought them.</p>';
+  const right = S.myXI.map((pid, i) => '<div class="slot' + (S.sel && S.sel.k === 's' && S.sel.i === i ? ' sel' : '') + '"><button class="sl' + (pid ? '' : ' empty') + '" data-act="slot" data-i="' + i + '"><span>' + (pid ? esc((pm[pid] || {}).name) : 'Empty slot') + '</span></button>' + (pid && !locked ? '<button class="x" data-act="unslot" data-i="' + i + '" aria-label="Remove from XI">x</button>' : '') + '</div>').join('');
   const filled = S.myXI.filter(Boolean).length;
   let hint = 'Tap a squad player, then tap a slot.';
   if (S.sel && S.sel.k === 'p') hint = 'Now tap a slot for ' + pm[S.sel.id].name + '.';
@@ -753,8 +754,7 @@ function vSquad(){
   const st = S.room.status;
   let lockBtn = '';
   if (st === 'xi' && !isDQ(S.uid)){
-    lockBtn = locked ? (S.room.status === 'xi' ? '<button class="btn" data-act="unlock">Unlock to edit</button>' : '') :
-      '<button class="btn pri" data-act="lock"' + (filled === size ? '' : ' disabled') + '>Lock my XI</button>';
+    lockBtn = locked ? '<button class="btn" data-act="unlock">Unlock to edit</button>' : '<button class="btn pri" data-act="lock"' + (filled === size ? '' : ' disabled') + '>Lock my XI</button>';
   } else if (st === 'auction') lockBtn = '<small>You can lock your XI once the auction ends.</small>';
   return '<section class="card"><div class="two"><div class="col"><h3>Squad <small>' + squad.length + ' of ' + cfg().minSquad + ' to ' + cfg().maxSquad + '</small></h3>' + left + '</div>' +
     '<div class="col"><h3>' + xiLabel() + ' <small>' + filled + '/' + size + '</small></h3>' + right + '</div></div>' +
@@ -766,9 +766,8 @@ function vBoard(){
   const pm = pMap(), st = S.state, sold = soldAll();
   const teams = S.members.map(m => {
     const sq = teamSold(m.uid), dq = isDQ(m.uid), open = S.open[m.uid];
-    return '<div class="trow"><button class="thead" data-act="bd" data-u="' + esc(m.uid) + '" aria-expanded="' + (open ? 'true' : 'false') + '">' + dotHtml(m.uid) + '<b>' + esc(m.team) + (m.uid === S.uid ? ' (you)' : '') + '</b>' +
-      (dq ? '<span class="badge bad">Out</span>' : '') + '<small>' + sq.length + ' players</small><em>' + purse(m.uid) + 'cr</em></button>' +
-      (open ? (sq.length ? '<ol class="tsq">' + sq.map(x => '<li><b>' + esc(pm[x.pid].name) + '</b> ' + x.price + 'cr</li>').join('') + '</ol>' : '<small>No players yet.</small>') : '') + '</div>';
+    return '<div class="trow"><button class="thead" data-act="bd" data-u="' + esc(m.uid) + '" aria-expanded="' + (open ? 'true' : 'false') + '">' + dotHtml(m.uid) + '<b>' + esc(m.team) + (m.uid === S.uid ? ' (you)' : '') + '</b><small>' + sq.length + ' players</small><em>' + purse(m.uid) + 'cr</em></button>' +
+      (open ? (sq.length ? '<ol class="tsq">' + sq.map(x => '<li><b>' + esc((pm[x.pid] || {}).name) + '</b> ' + x.price + 'cr</li>').join('') + '</ol>' : '<small>No players yet.</small>') : '') + '</div>';
   }).join('');
   const queued = new Set([...(st ? st.queue : []), ...(st ? st.unsold : [])]);
   const cur = st && st.phase === 'bidding' ? st.cur.pid : null;
@@ -797,7 +796,7 @@ function vJudging(){
   const jname = judgeUid() ? teamName(judgeUid()) : 'The judge';
   const jwho = cfg().judgeMode === 'host' ? 'the host' : jname;
   const ctl = isJ ?
-    '<div class="two-btn"><button class="btn pri big" data-act="jgive">Give a point</button><button class="btn big" data-act="jskip">Skip</button></div><div class="actions"><button class="btn ghost" data-act="jundo"' + (j.ti === 0 && j.pi === 0 ? ' disabled' : '') + '>Undo last</button></div>' :
+    '<div class="two-btn"><button class="btn pri big" data-act="jgive">Give a point</button><button class="btn big" data-act="jskip">Skip</button></div><div class="actions"><button class="btn ghost" data-act="jundo">Undo</button></div>' :
     '<p class="muted">Waiting for ' + esc(jwho) + ' to decide.</p>' + (iAmHost() ? '<div class="actions"><button class="btn ghost" data-act="jtake">Judge it myself instead</button></div>' : '');
   const board = j.order.map(u => { const mk = j.marks[u] || []; return '<div class="rank">' + dotHtml(u) + '<b>' + esc(teamName(u)) + '</b><em>' + mk.filter(x => x === 1).length + '</em></div>'; }).join('');
   return '<section class="card jcard"><div class="jt">' + dotHtml(tuid) + ' ' + esc(teamName(tuid)) + ', ' + xiLabel() + '</div>' +
@@ -813,16 +812,16 @@ function vResults(){
   } else if (c.judgeMode === 'none' || !S.judging){
     head = '<section class="card"><h2>Auction complete</h2><p class="muted">There was no judge, so no winner is crowned. Compare the final squads below.</p></section>';
   } else head = '<section class="card"><h2>No winner</h2><p class="muted">Every team was disqualified.</p></section>';
-  const ranked = judged ? R.ranked.map((x, i) => '<div class="rank"><span class="n">' + (i + 1) + '</span>' + dotHtml(x.uid) + '<b>' + esc(x.team) + (x.avg ? ' <small>(judge team, scored at the average)</small>' : '') + '</b><em>' + x.score + '</em></div>').join('') : '';
+  const ranked = judged ? R.ranked.map((x, i) => '<div class="rank"><span class="n">' + (i + 1) + '</span>' + dotHtml(x.uid) + '<b>' + esc(x.team) + '</b><em>' + x.score + '</em></div>').join('') : '';
   const dqs = R.rows.filter(x => x.dq).map(x => '<div class="rank"><span class="n">x</span>' + dotHtml(x.uid) + '<b>' + esc(x.team) + '</b><small>Disqualified, ' + x.n + ' of ' + c.minSquad + ' players</small></div>').join('');
   const lists = R.rows.filter(x => !x.dq).map(x => {
     const open = S.open['r' + x.uid], ids = x.xi.length ? x.xi : finalXI(S.members.find(m => m.uid === x.uid) || { uid:x.uid, xi:[] });
-    return '<div class="trow"><button class="thead" data-act="bd" data-u="r' + esc(x.uid) + '">' + dotHtml(x.uid) + '<b>' + esc(x.team) + '</b><small>' + x.purse + 'cr left</small>' + (x.score !== null ? '<em>' + x.score + '</em>' : '') + '</button>' +
-      (open ? '<ul class="xilist">' + ids.map((id, i) => '<li><span>' + esc((pm[id] || {}).name) + '</span><span class="' + (x.marks[i] === 1 ? 'y' : 'n') + '">' + (x.marks[i] === 1 ? 'Point' : x.marks[i] === 0 ? 'No point' : '') + '</span></li>').join('') + '</ul>' : '') + '</div>';
+    return '<div class="trow"><button class="thead" data-act="bd" data-u="r' + esc(x.uid) + '" aria-expanded="' + (open ? 'true' : 'false') + '">' + dotHtml(x.uid) + '<b>' + esc(x.team) + '</b><small>' + x.purse + 'cr left</small>' + (x.score !== null ? '<em>' + x.score + '</em>' : '') + '</button>' +
+      (open ? '<ul class="xilist">' + ids.map((id, i) => '<li><span>' + esc((pm[id] || {}).name) + '</span><span class="' + (x.marks[i] === 1 ? 'y' : 'n') + '">' + (x.marks[i] === 1 ? 'Point' : 'No') + '</span></li>').join('') + '</ul>' : '') + '</div>';
   }).join('');
   return head + (ranked || dqs ? '<section class="card"><h2>Standings</h2>' + ranked + dqs + '</section>' : '') +
     '<section class="card"><h2>Playing XIs</h2>' + (lists || '<p class="muted">No teams to show.</p>') + '</section>' +
-    '<section class="card"><div class="actions">' + (iAmHost() ? '<button class="btn danger" data-act="' + (S.closeAsk ? 'closeyes' : 'closeask') + '">' + (S.closeAsk ? 'Tap again to delete' : 'Close and delete room') + '</button>' : '') + '<button class="btn" data-act="leave">Back to home</button></div></section>';
+    '<section class="card"><div class="actions">' + (iAmHost() ? '<button class="btn danger" data-act="' + (S.closeAsk ? 'closeyes' : 'closeask') + '">' + (S.closeAsk ? 'Tap again to delete' : 'Close room') + '</button>' : '') + '</div></section>';
 }
 
 /* ---------- render loop ---------- */
@@ -998,160 +997,44 @@ function act(a, el){
     case 'jgive': if (amJudge() || host) judgeStep(true); return;
     case 'jskip': if (amJudge() || host) judgeStep(false); return;
     case 'jundo': if (amJudge() || host) judgeUndo(); return;
-  }
-  if (!host) return;
-  switch (a){
-    case 'cfg': {
-      const k = d.k, r = clone(S.room), c = r.cfg, l = LIM[k]; if (!l) return;
-      c[k] = Math.min(l[1], Math.max(l[0], c[k] + (+d.d)));
-      if (k === 'minSquad' && c.maxSquad < c.minSquad) c.maxSquad = c.minSquad;
-      if (k === 'maxSquad' && c.minSquad > c.maxSquad) c.minSquad = c.maxSquad;
-      return commitRoom(r);
-    }
-    case 'jmode': {
-      const r = clone(S.room), c = r.cfg; c.judgeMode = d.m;
-      if (d.m === 'host') c.judgeId = S.uid; else if (d.m === 'none') c.judgeId = null; else if (!S.members.some(m => m.uid === c.judgeId)) c.judgeId = null;
-      return commitRoom(r);
-    }
-    case 'jpick': { const r = clone(S.room); r.cfg.judgeId = d.u; return commitRoom(r); }
-    case 'jtake': { const r = clone(S.room); r.cfg.judgeMode = 'host'; r.cfg.judgeId = S.uid; return commitRoom(r); }
-    case 'kick': return void S.db.doc('rooms/' + S.code + '/members/' + d.u).delete().then(() => rerender(true)).catch(onErr);
-    case 'hostplay': {
-      const team = (S.form.hostteam || '').trim().slice(0, 20); if (!team) return toast('Type a team name first.');
-      if (S.members.length >= cfg().maxTeams) return toast('Raise the team limit first.');
-      return void memberRef(S.uid).set({ uid:S.uid, team, joinedAt:Date.now(), xi:[], locked:false }).then(() => rerender(true)).catch(onErr);
-    }
-    case 'addp': {
-      const name = (S.form.pname || '').trim(); if (!name) return toast('Type a player name.');
-      const base = Math.max(1, Math.min(100, parseInt(S.form.pbase, 10) || 1));
-      const r = clone(S.room); if (r.players.length >= 100) return toast('Limit is 100 players.');
-      r.players.push({ id:uid8(), name:name.slice(0, 28), base });
-      S.form.pname = ''; S.focusSel = '#np-name'; return commitRoom(r);
-    }
-    case 'togglebulk': S.form.bulkOpen = !S.form.bulkOpen; return rerender(true);
-    case 'bulk': {
-      const { out, bad } = parseList(S.form.bulk || ''); if (!out.length) return toast('No valid lines. Try "Kohli 5cr".');
-      const r = clone(S.room); r.players = r.players.concat(out).slice(0, 100);
-      S.form.bulk = bad.join('\n'); if (!bad.length) S.form.bulkOpen = false;
-      toast(out.length + ' added' + (bad.length ? ', ' + bad.length + ' line(s) skipped' : ''));
-      return commitRoom(r);
-    }
-    case 'sample': { const r = clone(S.room); r.players = r.players.concat(parseList(SAMPLE).out).slice(0, 100); return commitRoom(r); }
-    case 'delp': { const r = clone(S.room); r.players = r.players.filter(p => p.id !== d.id); return commitRoom(r); }
-    case 'clearp': { const r = clone(S.room); r.players = []; return commitRoom(r); }
-    case 'start': return hostStart();
-    case 'pause': return hostPause();
-    case 'hammer': if (S.state.phase === 'bidding' && S.state.cur.leader) resolve(false); return;
-    case 'skip': if (S.state.phase === 'bidding') resolve(true); return;
-    case 'endask': S.endAsk = true; rerender(); setTimeout(() => { S.endAsk = false; rerender(); }, 4000); return;
-    case 'endyes': S.endAsk = false; return hostEnd();
-    case 'startj': return startJudging();
-    case 'finish': return finishNoJudge();
-    case 'closeask': S.closeAsk = true; rerender(); setTimeout(() => { S.closeAsk = false; rerender(); }, 4000); return;
-    case 'closeyes': return closeRoom();
+    case 'jtake': if (host) { S.judging = null; commitJudging({ teams:S.members.filter(m => count(m.uid) >= cfg().minSquad).map(m => ({ uid:m.uid, xi:finalXI(m) })), order:S.members.filter(m => count(m.uid) >= cfg().minSquad).map(m => m.uid), ti:0, pi:0, marks:{}, done:false, v:0 }); } return;
+    case 'cfg': if (!host) return; const k = d.k; const cur = S.room.cfg[k]; const delta = Number(d.d || 0); if (!LIM[k]) return; const next = Math.max(LIM[k][0], Math.min(LIM[k][1], cur + delta)); if (next !== cur){ const r = clone(S.room); r.cfg[k] = next; commitRoom(r); } return;
+    case 'jmode': if (!host) return; const r = clone(S.room); r.cfg.judgeMode = d.m; if (d.m === 'player') r.cfg.judgeId = S.members[0] ? S.members[0].uid : S.uid; if (d.m !== 'player') r.cfg.judgeId = null; commitRoom(r); return;
+    case 'jpick': if (!host) return; const rr = clone(S.room); rr.cfg.judgeId = d.u; commitRoom(rr); return;
+    case 'start': if (host) hostStart(); return;
+    case 'pause': if (host) hostPause(); return;
+    case 'hammer': if (host) resolve(false); return;
+    case 'skip': if (host) resolve(true); return;
+    case 'endask': if (host) S.endAsk = true; rerender(); return;
+    case 'endyes': if (host){ S.endAsk = false; hostEnd(); } return;
+    case 'finish': if (host) { const r = clone(S.room); r.status = 'done'; commitRoom(r); } return;
+    case 'startj': if (host) startJudging(); return;
+    case 'addp': if (!host) return; const name = (S.form.pname || '').trim(); const base = Number(S.form.pbase); if (!name || !Number.isFinite(base) || base < 1) return toast('Need a valid player name and base price.'); const pid = uid8(); const rr2 = clone(S.room); rr2.players.push({ id:pid, name:name.slice(0,28), base:Math.max(1,Math.min(100,Math.round(base))) }); commitRoom(rr2); S.form.pname=''; S.form.pbase=''; return rerender();
+    case 'delp': if (!host) return; const rr3 = clone(S.room); rr3.players = rr3.players.filter(p => p.id !== d.id); commitRoom(rr3); return;
+    case 'sample': if (!host) return; const rr4 = clone(S.room); rr4.players = parseList(SAMPLE).out; commitRoom(rr4); return;
+    case 'togglebulk': S.form.bulkOpen = !S.form.bulkOpen; return rerender();
+    case 'parsebulk': if (!host) return; const parsed = parseList(S.form.bulk || ''); const rr5 = clone(S.room); rr5.players.push(...parsed.out); commitRoom(rr5); S.form.bulk=''; S.form.bulkOpen=false; return rerender();
+    case 'clearp': if (!host) return; if (!confirm('Clear all players from this room?')) return; const rr6 = clone(S.room); rr6.players = []; commitRoom(rr6); return;
+    case 'hostjoin': if (!me()) { const team = (S.form.hostteam || '').trim(); if (!team) return toast('Pick a team name first.'); const r2 = clone(S.room); S.members.push({ uid:S.uid, team, joinedAt:Date.now(), xi:[], locked:false }); S.form.hostteam=''; commitRoom(r2); } return;
+    case 'closeask': S.closeAsk = !S.closeAsk; return rerender();
+    case 'closeyes': if (host){ closeRoom(); leaveRoom(); } return;
+    case 'kick': if (!host) return; const aa = clone(S.room); const mem = S.members.find(m => m.uid === d.u); if (mem && !confirm('Remove ' + mem.team + ' from the room?')) return; const memberDoc = S.db.doc('rooms/' + S.code + '/members/' + d.u); memberDoc.delete().catch(onErr); return;
+    default: return;
   }
 }
 
-async function init(){
-  render();
-  try{ if (claudeApi && claudeApi.use){ S.db = await claudeApi.use('db'); S.user = await claudeApi.use('user'); } }catch(e){ console.error(e); }
-  S.connecting = false;
-  if (S.user){
-    try{ S.uid = await S.user.id(); }catch(e){}
-    try{ S.canWrite = await S.user.can('data.write'); }catch(e){}
+/* ---------- init ---------- */
+try{
+  if (window.firebase && window.firebase.apps && window.firebase.apps.length){
+    const app = window.firebase.apps[0] || window.firebase.initializeApp({ projectId: 'demo-cricket-auction' });
+    S.db = window.firebase.firestore();
+    S.canWrite = true;
+    S.connecting = false;
   }
-  if (!S.uid){ let a = ls.get(LS + ':anon'); if (!a){ a = 'anon_' + uid8(); ls.set(LS + ':anon', a); } S.uid = a; }
-  if (S.db && ls.get(LS)) await resume(); else rerender(true);
-}
-init();
-return { S, act, parseList, destroy(){ clearInterval(loop); leaveRoom(true); } };
-}
-window.CricketAuction = { createApp };
-})();
-
-/* ---------- Firebase boot: setup screen, anonymous sign-in, then start the game ---------- */
-(function(){
-'use strict';
-if (window.__NO_AUTOSTART) return;
-const KEY = 'cricket-auction:fbcfg';
-const root = document.getElementById('app');
-const lsGet = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
-const lsSet = (k, v) => { try{ localStorage.setItem(k, v); }catch(e){} };
-const lsDel = k => { try{ localStorage.removeItem(k); }catch(e){} };
-const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const KEYS = ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'];
-function parseCfg(text){
-  const cfg = {}, re = /["']?(apiKey|authDomain|projectId|storageBucket|messagingSenderId|appId|measurementId)["']?\s*:\s*["']([^"']+)["']/g;
-  let m; while ((m = re.exec(String(text)))) cfg[m[1]] = m[2];
-  return cfg;
-}
-const validCfg = c => !!(c && c.apiKey && c.projectId && c.appId);
-const slim = c => { const o = {}; KEYS.forEach(k => { if (c[k]) o[k] = c[k]; }); return o; };
-function readHash(){
-  const out = {}, h = location.hash.replace(/^#/, ''); if (!h) return out;
-  const p = new URLSearchParams(h);
-  if (p.get('fb')){ try{ out.cfg = JSON.parse(atob(p.get('fb'))); }catch(e){} }
-  if (p.get('room')) out.room = p.get('room').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
-  return out;
-}
-function page(inner){ root.innerHTML = '<div class="wrap home">' + inner + '</div>'; }
-function brand(title, text){ return '<div class="brand"><div class="stump"><i></i><i></i><i></i></div><h1>' + title + '</h1>' + (text ? '<p>' + text + '</p>' : '') + '</div>'; }
-
-function showSetup(msg){
-  page(brand('One-time<br>setup', 'Paste the Firebase web config for your project. You do this once. Then you can send friends an invite link that carries it for them.') +
-    '<section class="card"><label for="cfg">Firebase web config</label><textarea id="cfg" placeholder="const firebaseConfig = {&#10;  apiKey: &quot;...&quot;,&#10;  projectId: &quot;...&quot;,&#10;  appId: &quot;...&quot;&#10;};"></textarea>' +
-    (msg ? '<div class="note warn">' + esc(msg) + '</div>' : '') +
-    '<div style="height:12px"></div><button class="btn pri" id="cfgsave">Save and start</button></section>');
-  root.querySelector('#cfgsave').addEventListener('click', () => {
-    const cfg = parseCfg(root.querySelector('#cfg').value);
-    if (!validCfg(cfg)) return showSetup('That config is missing apiKey, projectId or appId. Copy the whole block from Project settings, Your apps.');
-    lsSet(KEY, JSON.stringify(slim(cfg))); start(slim(cfg), null);
-  });
-}
-function fail(msg){
-  page(brand('Cannot<br>connect', '') + '<section class="card"><div class="note warn">' + esc(msg) + '</div>' +
-    '<button class="btn pri" id="retry">Try again</button><div style="height:8px"></div><button class="btn" id="reset">Change Firebase project</button></section>');
-  root.querySelector('#retry').addEventListener('click', () => location.reload());
-  root.querySelector('#reset').addEventListener('click', () => { lsDel(KEY); location.reload(); });
-}
-function explain(e){
-  const c = (e && e.code) || '';
-  if (c === 'auth/operation-not-allowed' || c === 'auth/admin-restricted-operation') return 'Anonymous sign-in is switched off. In Firebase open Authentication, Sign-in method, turn on Anonymous, then try again.';
-  if (c === 'auth/configuration-not-found') return 'Authentication is not set up yet. In Firebase open Authentication and tap Get started, then turn on Anonymous.';
-  if (c === 'auth/invalid-api-key' || c === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.') return 'That API key is not valid. Check the config you pasted.';
-  if (c === 'auth/unauthorized-domain') return "This website is not allowed yet. In Firebase open Authentication, Settings, Authorized domains, and add this site's domain.";
-  if (c === 'auth/network-request-failed' || c === 'unavailable') return 'No connection to Firebase. Check your internet and try again.';
-  if (c === 'permission-denied') return 'Firestore is blocking access. Paste the security rules from the setup guide and tap Publish.';
-  if (c === 'not-found' || c === 'failed-precondition') return 'The Firestore database does not exist yet. In Firebase open Firestore Database and tap Create database.';
-  return 'Something went wrong: ' + (c || (e && e.message) || 'unknown error');
-}
-async function start(cfg, room){
-  page(brand('Connecting', 'Signing in to your game server.'));
-  if (!window.firebase) return fail('Could not load Firebase from the internet. Check your connection and reload.');
-  let db, uid;
-  try{
-    if (!firebase.apps.length) firebase.initializeApp(cfg);
-    const auth = firebase.auth();
-    const existing = await new Promise(res => { const un = auth.onAuthStateChanged(u => { un(); res(u); }); });
-    uid = existing ? existing.uid : (await auth.signInAnonymously()).user.uid;
-    db = firebase.firestore();
-    try{ db.settings({ experimentalAutoDetectLongPolling:true, merge:true }); }catch(e){}
-    await db.doc('rooms/_probe').get();
-  }catch(e){ console.error(e); return fail(explain(e)); }
-  const shim = { use: async n => n === 'db' ? db : n === 'user' ? { id: async () => uid, can: async () => true, isOwner: async () => false, canEdit: async () => false } : null };
-  root.innerHTML = '';
-  window.CricketAuction.createApp(root, shim, {
-    lsKey: 'cricket-auction:' + cfg.projectId, prefillCode: room,
-    onReset(){ lsDel(KEY); location.reload(); },
-    inviteUrl(code){ return location.href.split('#')[0] + '#fb=' + encodeURIComponent(btoa(JSON.stringify(slim(cfg)))) + '&room=' + code; }
-  });
-}
-const hash = readHash();
-let cfg = null;
-if (hash.cfg && validCfg(hash.cfg)){ cfg = slim(hash.cfg); lsSet(KEY, JSON.stringify(cfg)); }
-else { try{ const s = lsGet(KEY); if (s) cfg = JSON.parse(s); }catch(e){} }
-if (hash.cfg || hash.room){ try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){} }
-if (!validCfg(cfg)) showSetup(); else start(cfg, hash.room || null);
+} catch (e){ console.warn('No Firebase app available in this view.', e); }
+if (!S.db && opts.firebase && opts.firebase.db){ S.db = opts.firebase.db; S.canWrite = opts.firebase.canWrite !== false; S.connecting = false; }
+if (opts.prefillCode) { S.code = opts.prefillCode; }
+if (opts.autoResume) resume(); else rerender(true);
 })();
 </script>
 </body>
